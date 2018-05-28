@@ -1,0 +1,23 @@
+imports:
+    - { resource: config.yml }
+
+monolog:
+    channels:
+        - process_monitor
+
+    handlers:
+        main:
+            type: fingers_crossed
+            action_level: error
+            handler: nested
+        nested:
+            type: stream
+            path: '%kernel.logs_dir%/%kernel.environment%.log'
+            level: debug
+        console:
+            type: console
+            process_psr_3_messages: false
+        process_monitor:
+            type: stream
+            path: '%process_monitor_log%'
+            channels: [process_monitor]

@@ -1,0 +1,39 @@
+# This file is a "template" of what your parameters.yml file should look like
+# Set parameters here that may be different on each deployment target of the app, e.g. development, staging, production.
+# https://symfony.com/doc/current/best_practices/configuration.html#infrastructure-related-configuration
+parameters:
+    # You should uncomment this if you want to use pdo_sqlite
+    database_path: '%kernel.project_dir%/var/data/iTerminator.db'
+
+    mailer_transport: smtp
+    mailer_host: ~
+    mailer_user: ~
+    mailer_password: ~
+
+    # A secret key that's used to generate certain security-related tokens
+    secret: b16daa06ba3566fc9f8f194caac6d2d2b2a31440
+
+    aws_key: ~
+    aws_secret: ~
+    aws_region: ap-northeast-1
+    aws_s3_bucket_for_logs: product-log
+    aws_meta_data_access_host: http://169.254.169.254/latest/meta-data
+
+    process_monitor_log: '%kernel.project_dir%/var/logs/process_monitor'
+
+    # target_process: 'php .+ app:monitor' ## testing only
+    target_process: ~
+
+    upload.service_name: ~
+    upload.server_type: ~
+    upload.targets.system.location: /var/log
+    upload.targets.system.logs:
+        - messages
+        - maillog
+        - secure
+    upload.targets.application.location: '%kernel.project_dir%/var/logs'
+    upload.targets.application.logs:
+        - cybozu-http.log
+        - kintone.log
+        - process_monitor.log
+        - prod.log
