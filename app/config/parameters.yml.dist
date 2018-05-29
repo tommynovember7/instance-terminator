@@ -5,11 +5,6 @@ parameters:
     # You should uncomment this if you want to use pdo_sqlite
     database_path: '%kernel.project_dir%/var/data/iTerminator.db'
 
-    mailer_transport: smtp
-    mailer_host: ~
-    mailer_user: ~
-    mailer_password: ~
-
     # A secret key that's used to generate certain security-related tokens
     secret: b16daa06ba3566fc9f8f194caac6d2d2b2a31440
 
