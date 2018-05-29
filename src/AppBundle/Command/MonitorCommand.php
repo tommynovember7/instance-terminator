@@ -102,13 +102,33 @@ class MonitorCommand extends ContainerAwareCommand
     private function extractTargetProcess($content): string
     {
         $container = $this->getContainer();
-        $pattern = sprintf('#(%s( .+)?)#', $container->getParameter('target_process'));
-        preg_match($pattern, $content, $matched);
-        if (isset($matched[1]) && !empty($matched[1])) {
-            return sprintf('%s (%s)', $container->get('translator')->trans('found'), $matched[1]);
+
+        if ($uploadProcess = $this->processExists('#(app:upload-logs(.+)?)#', $content)) {
+            return sprintf('%s (%s)', $container->get('translator')->trans('found'), $uploadProcess);
         }
 
-        throw new Ec2Exception($container->get('translator')->trans('not_fount'));
+        $pattern = sprintf('#(%s( .+)?)#', $container->getParameter('target_process'));
+        if ($process = $this->processExists($pattern, $content)) {
+            return sprintf('%s (%s)', $container->get('translator')->trans('found'), $process);
+        }
+
+        throw new Ec2Exception($container->get('translator')->trans('not_found'));
+    }
+
+    /**
+     * @param string $pattern
+     * @param string $content
+     * @return string|null
+     */
+    private function processExists($pattern, $content)
+    {
+        preg_match($pattern, $content, $matched);
+
+        if (isset($matched[1]) && !empty($matched[1])) {
+            return $matched[1];
+        }
+
+        return null;
     }
 
     /**

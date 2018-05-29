@@ -1,4 +1,4 @@
 found: PROCESS FOUND
-not_fount: PROCESS NOT FOUND
+not_found: PROCESS NOT FOUND
 backup.start: Try backing up logs...
 backup.finished: Log backup completed.
