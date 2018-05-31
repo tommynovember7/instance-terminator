@@ -127,4 +127,61 @@ class Client
         fclose($readableStream);
         fclose($writableStream);
     }
+
+    /**
+     * @param array $parameters
+     * @return \Aws\Result
+     * @throws S3Exception
+     */
+    public function putObject(array $parameters = []): ?\Aws\Result
+    {
+        try {
+            if ($this->hasRequiredParameters(['Key'], $parameters)) {
+                $defaults = ['Bucket' => $this->getBucket()];
+                $parameters = array_merge($defaults, $parameters);
+            }
+
+            return $this->getS3Client()->putObject($parameters);
+        } catch (\RuntimeException $exception) {
+            throw new S3Exception($exception->getMessage());
+        }
+    }
+
+    /**
+     * @param resource|string|null $resource
+     * @return string|null
+     */
+    public function getSha256Value($resource): ?string
+    {
+        $fileName = null;
+        if (\is_resource($resource)) {
+            rewind($resource);
+            $fileName = stream_get_meta_data($resource)['uri'];
+        }
+        if (!\is_resource($resource) && file_exists($resource)) {
+            $fileName = $resource;
+        }
+        if (null === $fileName) {
+            return $fileName;
+        }
+
+        return hash_file('sha256', $fileName);
+    }
+
+    /**
+     * @param array $keys
+     * @param array $parameters
+     * @return bool
+     * @throws \RuntimeException
+     */
+    private function hasRequiredParameters(array $keys = [], array $parameters = []): bool
+    {
+        foreach ($keys as $key) {
+            if (!array_key_exists($key, $parameters)) {
+                throw new \RuntimeException(sprintf('`%s` must be defined in $parameters.', $key));
+            }
+        }
+
+        return true;
+    }
 }

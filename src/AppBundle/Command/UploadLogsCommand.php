@@ -82,30 +82,23 @@ class UploadLogsCommand extends ContainerAwareCommand
         [$type, $destination, $input, $output] = $arguments;
 
         return function ($fileNameBody) use ($type, $destination, $input, $output) {
+            $this->executeCommand(sprintf('chmod -R 777 %s', $destination), $input->getOption('root'));
+
             $sourceFile = sprintf('%s/%s', $this->getBase($type), $this->getFileName($fileNameBody, $type));
             if (!file_exists($sourceFile)) {
                 return;
             }
 
-            $this->executeCommand(sprintf('chmod -R 777 %s', $destination), $input->getOption('root'));
 
             $partition = sprintf('%s/%s', $destination, $fileNameBody);
             if (!mkdir($partition, 0777) && !is_dir($partition)) {
                 return;
             }
 
-            $this->executeCommand(sprintf('chmod -R 777 %s', $destination), $input->getOption('root'));
-
-            $duplicatedFile = sprintf('%s/%s', $partition, $this->getFileName($fileNameBody, $type));
             $this->executeCommand(
-                sprintf('cp %s %s/%s/', $sourceFile, $destination, $fileNameBody),
+                sprintf('cp %s* %s/%s/', $sourceFile, $destination, $fileNameBody),
                 $input->getOption('root')
             );
-            if (!file_exists($duplicatedFile)) {
-                return;
-            }
-
-            $this->executeCommand(sprintf('chmod -R 777 %s', $destination), $input->getOption('root'));
 
             $zipArchive = sprintf('%s/%s', $partition, $this->getFileName($fileNameBody, 'zip'));
             $this->createZipArchive($partition, $zipArchive, $this->getFileName($fileNameBody, $type));
@@ -115,10 +108,13 @@ class UploadLogsCommand extends ContainerAwareCommand
 
             $s3Client = $this->getS3Client();
             $s3Key = $this->getS3Key($type, $fileNameBody, $this->getFileName($fileNameBody, 'zip'));
-            $s3Client->streamCopy($s3Client->composeStreamPath($s3Key), $zipArchive);
-            if (!$s3Client->doesObjectExist($s3Key)) {
-                return;
-            }
+            $s3Client->putObject(
+                [
+                    'Key'           => ltrim($s3Key, '/'),
+                    'SourceFile'    => $zipArchive,
+                    'ContentSHA256' => $s3Client->getSha256Value($zipArchive),
+                ]
+            );
 
             if ($input->getOption('explicit')) {
                 $output->writeln('Uploaded: '.$s3Key);
