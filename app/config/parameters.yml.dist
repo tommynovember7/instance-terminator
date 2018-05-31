@@ -14,7 +14,7 @@ parameters:
     aws_s3_bucket_for_logs: product-log
     aws_meta_data_access_host: http://169.254.169.254/latest/meta-data
 
-    process_monitor_log: '%kernel.project_dir%/var/logs/process_monitor'
+    process_monitor_log: '%kernel.project_dir%/var/logs/process_monitor.log'
 
     # target_process: 'php .+ app:monitor' ## testing only
     target_process: ~
