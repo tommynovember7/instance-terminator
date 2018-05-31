@@ -83,12 +83,10 @@ class UploadLogsCommand extends ContainerAwareCommand
 
         return function ($fileNameBody) use ($type, $destination, $input, $output) {
             $this->executeCommand(sprintf('chmod -R 777 %s', $destination), $input->getOption('root'));
-
             $sourceFile = sprintf('%s/%s', $this->getBase($type), $this->getFileName($fileNameBody, $type));
             if (!file_exists($sourceFile)) {
                 return;
             }
-
 
             $partition = sprintf('%s/%s', $destination, $fileNameBody);
             if (!mkdir($partition, 0777) && !is_dir($partition)) {
@@ -100,6 +98,7 @@ class UploadLogsCommand extends ContainerAwareCommand
                 $input->getOption('root')
             );
 
+            $this->executeCommand(sprintf('chmod -R 777 %s', $destination), $input->getOption('root'));
             $zipArchive = sprintf('%s/%s', $partition, $this->getFileName($fileNameBody, 'zip'));
             $this->createZipArchive($partition, $zipArchive, $this->getFileName($fileNameBody, $type));
             if (!file_exists($zipArchive)) {
